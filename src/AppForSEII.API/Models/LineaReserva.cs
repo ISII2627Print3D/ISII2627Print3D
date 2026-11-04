@@ -26,4 +26,18 @@ public class LineaReserva
 
     [ForeignKey(nameof(Impresora3DId))]
     public Impresora3D Impresora3D { get; set; } = null!;
+public LineaReserva()
+{
+}
+
+public LineaReserva(
+    Impresora3D impresora,
+    TiempoReserva tiempoReserva,
+    decimal precioSubtotal)
+{
+    Impresora3D = impresora;
+    Impresora3DId = impresora.Id;
+    TiempoReserva = tiempoReserva;
+    PrecioSubtotal = precioSubtotal;
+}
 }

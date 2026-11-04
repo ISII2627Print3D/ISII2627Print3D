@@ -14,6 +14,7 @@ namespace AppForSEII.API.Data {
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             try {
                 SeedUsers(userManager, rolesNames);
+                SeedClientePrueba(userManager);
             }
             catch (Exception ex) {
                 logger.LogError(ex, "An error occurred seeding the Users in the Database.");
@@ -22,6 +23,45 @@ namespace AppForSEII.API.Data {
  
 
         }
+
+        public static void SeedClientePrueba(
+    UserManager<ApplicationUser> userManager)
+{
+    const string clienteId = "cliente-prueba-reserva";
+
+    var existente = userManager.FindByIdAsync(clienteId)
+        .GetAwaiter().GetResult();
+
+    if (existente != null)
+    {
+        if (existente is not Cliente)
+            throw new InvalidOperationException(
+                "El identificador de prueba pertenece a un usuario que no es Cliente.");
+
+        return;
+    }
+
+    var cliente = new Cliente(
+        clienteId,
+        "Cliente",
+        "Prueba",
+        "cliente.reserva@example.com",
+        "Calle de prueba 1");
+
+    var resultado = userManager.CreateAsync(cliente)
+        .GetAwaiter().GetResult();
+
+    if (!resultado.Succeeded)
+    {
+        var errores = string.Join(
+            "; ",
+            resultado.Errors.Select(error => error.Description));
+
+        throw new InvalidOperationException(
+            "No se pudo crear el cliente de prueba: " + errores);
+    }
+}
+
 
         public static void SeedRoles(RoleManager<IdentityRole> roleManager, List<string> roles) {
 
