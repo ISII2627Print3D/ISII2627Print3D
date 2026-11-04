@@ -19,9 +19,59 @@ namespace AppForSEII.API.Data {
             catch (Exception ex) {
                 logger.LogError(ex, "An error occurred seeding the Users in the Database.");
             }
+            try {
+                SeedImpresoras(dbContext);
+            }
+            catch (Exception ex) {
+                logger.LogError(ex, "Error al insertar los datos iniciales de impresoras.");
+            }
+        }
 
- 
+        public static void SeedImpresoras(ApplicationDbContext dbContext)
+        {
+            var impresoras = new List<Impresora3D>
+            {
+                new Impresora3D
+                {
+                    Nombre = "Impresora Filamento 01",
+                    Modelo = "Modelo F1",
+                    Tipo = TipoImpresora.Filamento,
+                    Descripcion = "Impresora de filamento para piezas y prototipos.",
+                    PrecioKilovatioHora = 0.1500m,
+                    PrecioReserva = 3.00m
+                },
+                new Impresora3D
+                {
+                    Nombre = "Impresora Resina 01",
+                    Modelo = "Modelo R1",
+                    Tipo = TipoImpresora.Resina,
+                    Descripcion = "Impresora de resina para modelos de detalle.",
+                    PrecioKilovatioHora = 0.1800m,
+                    PrecioReserva = 5.00m
+                },
+                new Impresora3D
+                {
+                    Nombre = "Impresora Polimero 01",
+                    Modelo = "Modelo P1",
+                    Tipo = TipoImpresora.Polimero,
+                    Descripcion = "Impresora de polímero para piezas personalizadas.",
+                    PrecioKilovatioHora = 0.2000m,
+                    PrecioReserva = 7.00m
+                }
+            };
 
+            foreach (var impresora in impresoras)
+            {
+                bool existe = dbContext.Impresoras3D.Any(
+                    i => i.Nombre == impresora.Nombre);
+
+                if (!existe)
+                {
+                    dbContext.Impresoras3D.Add(impresora);
+                }
+            }
+
+            dbContext.SaveChanges();
         }
 
         public static void SeedClientePrueba(
