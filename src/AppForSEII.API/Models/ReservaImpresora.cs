@@ -38,4 +38,27 @@ public class ReservaImpresora
 
     public ICollection<LineaReserva> LineasReserva { get; set; }
     = new List<LineaReserva>();
+
+public ReservaImpresora(){
+}
+
+public ReservaImpresora(
+    Cliente cliente,
+    DateTime fechaReserva,
+    string nombreCliente,
+    string apellidosCliente,
+    string direccionFacturacion,
+    MetodoPago metodoPago,
+    ICollection<LineaReserva> lineasReserva)
+{
+    Cliente = cliente;
+    ClienteId = cliente.Id;
+    FechaReserva = fechaReserva;
+    NombreCliente = nombreCliente;
+    ApellidosCliente = apellidosCliente;
+    DireccionFacturacion = direccionFacturacion;
+    MetodoPago = metodoPago;
+    LineasReserva = lineasReserva;
+    PrecioTotal = lineasReserva.Sum(linea => linea.PrecioSubtotal);
+}
 }
