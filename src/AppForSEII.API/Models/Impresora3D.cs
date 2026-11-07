@@ -5,6 +5,28 @@ namespace AppForSEII.API.Models;
 
 public class Impresora3D
 {
+    public Impresora3D()
+{
+}
+
+public Impresora3D(
+    int id,
+    string nombre,
+    string modelo,
+    TipoImpresora tipo,
+    string descripcion,
+    decimal precioKilovatioHora,
+    decimal precioReserva)
+{
+    Id = id;
+    Nombre = nombre;
+    Modelo = modelo;
+    Tipo = tipo;
+    Descripcion = descripcion;
+    PrecioKilovatioHora = precioKilovatioHora;
+    PrecioReserva = precioReserva;
+}
+
     [Key]
     public int Id { get; set; }
 
