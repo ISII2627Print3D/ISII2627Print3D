@@ -72,6 +72,8 @@ public async Task<IActionResult> CreateReserva(
     if (!Enum.IsDefined(typeof(MetodoPago), reservaDTO.MetodoPago.Value))
     return BadRequest("El método de pago no es válido.");
 
+  
+
     foreach (var linea in reservaDTO.LineasReserva)
     {
         if (linea == null ||
@@ -103,6 +105,14 @@ public async Task<IActionResult> CreateReserva(
 
     if (impresoras.Count != ids.Count)
         return BadRequest("Alguna de las impresoras seleccionadas ya no existe.");
+
+
+
+    ///añadido
+    
+    if(!reservaDTO.DireccionFacturacion.EndsWith ("Albacete"))
+    return BadRequest("!Error! solo se admiten direciones de facturacion en albacete");
+
 
     // 4. Crear las líneas usando los precios de la base de datos.
     var lineas = new List<LineaReserva>();

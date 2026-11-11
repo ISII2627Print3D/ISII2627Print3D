@@ -20,7 +20,7 @@ public class CreateReserva_test : AppForSEII4SqliteUT
             "cliente-test",
             "Ana",
             "García",
-            "Calle de prueba 1",
+            "Calle de prueba 1 Albacete",
             null,
             lineas);
 
@@ -49,6 +49,7 @@ public class CreateReserva_test : AppForSEII4SqliteUT
         Assert.False(
             await contextoComprobacion.LineasReserva.AnyAsync());
     }
+
 
     [Theory]
 [InlineData(99)]
@@ -112,7 +113,7 @@ public async Task SinImpresoras_DevuelveBadRequestYNoGuarda(bool listaNula)
         "cliente-test",
         "Ana",
         "García",
-        "Calle de prueba 1",
+        "Calle de prueba 1 Albacete",
         MetodoPago.TarjetaCredito,
         lineas);
 
@@ -157,7 +158,7 @@ public async Task ConModelStateInvalido_DevuelveBadRequestYNoGuarda()
         "cliente-test",
         "",
         "García",
-        "Calle de prueba 1",
+        "Calle de prueba 1 Albacete",
         MetodoPago.TarjetaCredito,
         lineas);
 
@@ -215,7 +216,7 @@ public async Task ConLineaInvalida_DevuelveBadRequestYNoGuarda(
         "cliente-test",
         "Ana",
         "García",
-        "Calle de prueba 1",
+        "Calle de prueba 1 Albacete",
         MetodoPago.TarjetaCredito,
         lineas);
 
@@ -256,7 +257,7 @@ public async Task ConLineaNula_DevuelveBadRequestYNoGuarda()
         "cliente-test",
         "Ana",
         "García",
-        "Calle de prueba 1",
+        "Calle de prueba 1 Albacete",
         MetodoPago.TarjetaCredito,
         lineas);
 
@@ -452,7 +453,7 @@ public async Task ConDatosValidos_CreaReservaConDosImpresoras()
     // Arrange
     var cliente = new Cliente(
         "cliente-test", "Ana", "García",
-        "ana@example.com", "Calle de prueba 1");
+        "ana@example.com", "Calle de prueba Albacete");
 
     var filamento = new Impresora3D(
         1, "Impresora Filamento", "Modelo F1",
@@ -476,7 +477,7 @@ public async Task ConDatosValidos_CreaReservaConDosImpresoras()
         cliente.Id,
         "Ana",
         "García",
-        "Calle de prueba 1",
+        "Calle de prueba Albacete",
         MetodoPago.TarjetaCredito,
         lineas);
 
@@ -523,7 +524,7 @@ public async Task ConDatosValidos_CreaReservaConDosImpresoras()
         obtenido.FechaReserva,
         "Ana",
         "García",
-        "Calle de prueba 1",
+        "Calle de prueba Albacete",
         MetodoPago.TarjetaCredito,
         8.48m,
         lineasEsperadas);
@@ -546,7 +547,7 @@ public async Task ConDatosValidos_CreaReservaConDosImpresoras()
     Assert.Equal(cliente.Id, guardada.ClienteId);
     Assert.Equal("Ana", guardada.NombreCliente);
     Assert.Equal("García", guardada.ApellidosCliente);
-    Assert.Equal("Calle de prueba 1", guardada.DireccionFacturacion);
+    Assert.Equal("Calle de prueba Albacete", guardada.DireccionFacturacion);
     Assert.Equal(MetodoPago.TarjetaCredito, guardada.MetodoPago);
     Assert.Equal(obtenido.FechaReserva, guardada.FechaReserva);
     Assert.Equal(8.48m, guardada.PrecioTotal);
@@ -576,7 +577,7 @@ public async Task ConSubtotalFueraDeLimites_DevuelveBadRequestYNoGuarda(
     // Arrange
     var cliente = new Cliente(
         "cliente-test", "Ana", "García",
-        "ana@example.com", "Calle de prueba 1");
+        "ana@example.com", "Calle de prueba 1 Albacete");
 
     var impresora = new Impresora3D(
         1, "Impresora de prueba", "Modelo F1",
@@ -594,7 +595,7 @@ public async Task ConSubtotalFueraDeLimites_DevuelveBadRequestYNoGuarda(
         cliente.Id,
         "Ana",
         "García",
-        "Calle de prueba 1",
+        "Calle de prueba 1 Albacete",
         MetodoPago.TarjetaCredito,
         lineas);
 
@@ -622,4 +623,65 @@ public async Task ConSubtotalFueraDeLimites_DevuelveBadRequestYNoGuarda(
         await contextoComprobacion.LineasReserva.AnyAsync());
 }
 
+///
+/// 
+
+[Fact]
+public async Task ConDireccionNovalida()
+{
+    // Arrange
+    var cliente = new Cliente(
+        "cliente-test", "Ana", "García",
+        "ana@example.com", "Calle de prueba ");
+
+    var filamento = new Impresora3D(
+        1, "Impresora Filamento", "Modelo F1",
+        TipoImpresora.Filamento, "Impresora para prototipos",
+        0.15m, 3m);
+
+
+    _context.Clientes.Add(cliente);
+    _context.Impresoras3D.AddRange(filamento);
+    await _context.SaveChangesAsync();
+
+    var lineas = new List<LineaReservaCreateDTO>();
+    lineas.Add(new LineaReservaCreateDTO(1, TiempoReserva.DosHoras));
+
+
+    var solicitud = new ReservaCreateDTO(
+        cliente.Id,
+        "Ana",
+        "García",
+        "Calle de prueba ",
+        MetodoPago.TarjetaCredito,
+        lineas);
+
+    using var contexto = CreateContext();
+
+    var logger = new Mock<ILogger<ReservasController>>();
+    var controller = new ReservasController(contexto, logger.Object);
+
+    var inicio = DateTime.UtcNow;
+
+    // Act
+    var respuesta = await controller.CreateReserva(solicitud);
+
+    // Assert
+    var badRequest = Assert.IsType<BadRequestObjectResult>(respuesta);
+    Assert.Equal(400, badRequest.StatusCode);
+    Assert.Equal(
+        "!Error! solo se admiten direciones de facturacion en albacete",
+        badRequest.Value);
+
+    using var contextoComprobacion = CreateContext();
+
+    Assert.False(
+        await contextoComprobacion.ReservasImpresoras.AnyAsync());
+
+    Assert.False(
+        await contextoComprobacion.LineasReserva.AnyAsync());
 }
+
+}
+
+
